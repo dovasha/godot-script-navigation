@@ -1,0 +1,67 @@
+[gd_scene format=3 uid="uid://gdsx27dsoxtc"]
+
+[ext_resource type="Script" uid="uid://d18xsp6ljmvch" path="res://addons/script-navigation-tabs/script_navigation.gd" id="1_05hjw"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_kfd2r"]
+content_margin_top = 2.0
+content_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kfd2r"]
+content_margin_left = 5.0
+content_margin_top = 5.0
+content_margin_right = 5.0
+content_margin_bottom = 5.0
+bg_color = Color(0, 0, 0, 0.23529412)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[node name="ScriptNavigation" type="VSplitContainer" unique_id=799486397 node_paths=PackedStringArray("tab_container", "regions_list", "bookmarks_list")]
+custom_minimum_size = Vector2(0, 50)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+script = ExtResource("1_05hjw")
+tab_container = NodePath("TabContainer")
+regions_list = NodePath("TabContainer/Regions/RegionsList")
+bookmarks_list = NodePath("TabContainer/Bookmarks/BookmarksList")
+
+[node name="UpdateTimer" type="Timer" parent="." unique_id=1597462420]
+wait_time = 0.5
+autostart = true
+
+[node name="TabContainer" type="TabContainer" parent="." unique_id=206292375]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxEmpty_kfd2r")
+current_tab = 0
+
+[node name="Regions" type="ScrollContainer" parent="TabContainer" unique_id=439092358]
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="RegionsList" type="ItemList" parent="TabContainer/Regions" unique_id=1820143533]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_kfd2r")
+
+[node name="Bookmarks" type="ScrollContainer" parent="TabContainer" unique_id=1487969507]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 1
+
+[node name="BookmarksList" type="ItemList" parent="TabContainer/Bookmarks" unique_id=1609465391]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_kfd2r")
+
+[connection signal="timeout" from="UpdateTimer" to="." method="_refresh_regions"]
+[connection signal="timeout" from="UpdateTimer" to="." method="_refresh_bookmarks"]
+[connection signal="item_selected" from="TabContainer/Regions/RegionsList" to="." method="_on_region_selected"]
+[connection signal="item_selected" from="TabContainer/Bookmarks/BookmarksList" to="." method="_on_bookmark_selected"]

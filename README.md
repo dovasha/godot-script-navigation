@@ -1,2 +1,3 @@
-# godot-bookmarks-tab
-Adds a ‘Bookmarks’ tab to godot's Script Editor.
+# godot-script-navigation
+Adds "Bookmarks" and "Regions" tabs to the Script Editor sidebar. 
+Click any entry to jump to its line in the current script.

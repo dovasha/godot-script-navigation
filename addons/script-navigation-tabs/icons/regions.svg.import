@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dalowcy00hbja"
-path="res://.godot/imported/bookmark.svg-a71bf81f319e293d14fa22a64c2cf837.ctex"
+uid="uid://bqm0r7rokta1k"
+path="res://.godot/imported/regions.svg-1e91b775b8d89bfcdf7c23b0ebf4f565.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/bookmarks-tab/bookmark.svg"
-dest_files=["res://.godot/imported/bookmark.svg-a71bf81f319e293d14fa22a64c2cf837.ctex"]
+source_file="res://addons/script-navigation-tabs/icons/regions.svg"
+dest_files=["res://.godot/imported/regions.svg-1e91b775b8d89bfcdf7c23b0ebf4f565.ctex"]
 
 [params]
 
@@ -27,6 +27,10 @@ mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
+process/channel_remap/red=0
+process/channel_remap/green=1
+process/channel_remap/blue=2
+process/channel_remap/alpha=3
 process/fix_alpha_border=true
 process/premult_alpha=false
 process/normal_map_invert_y=false
