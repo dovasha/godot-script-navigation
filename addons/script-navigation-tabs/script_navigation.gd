@@ -14,9 +14,6 @@ var side_panel: VSplitContainer
 var methods_panel: VBoxContainer
 var code_edit: CodeEdit
 
-var _bookmarks: Dictionary
-var _regions: Dictionary
-
 
 #region Setup
 func enter() -> void:
@@ -40,7 +37,6 @@ func enter() -> void:
 	_on_script_changed()
 	side_panel.add_child(self)
 
-
 func exit() -> void:
 	script_editor.disconnect(&"editor_script_changed", _on_script_changed)
 	
@@ -55,39 +51,34 @@ func exit() -> void:
 func _refresh_list(items: Array, type: StringName) -> void:
 	## Refresh the ItemList of the given type, either &"regions" or &"bookmark"
 	
-	var modified := false
-	
+	# Item Index -> { Line Number: Line Text }
+	var entries: Array[Dictionary] # New entries
 	var list: ItemList = get(&"%s_list" % type)
-	var cached: Dictionary = get(&"_%s" % type)
 	
-	for removed in cached.keys().filter( func(line): return line not in items ):
-		cached.erase(removed)
-		modified = true
-		
 	for index in items.size():
 		var line: int = items[index]
 		var text: String = code_edit.get_line(line)
-		# Strip the region comment delimiter 
-		if type == &"regions": text = text.trim_prefix('#' + code_edit.get_code_region_start_tag())
 		
-		if line in cached and cached[line] == text:
-			continue # No modification, next item
-			
-		modified = true
 		match type:
-			&"regions":	  cached[line] = "%d. %s" % [index + 1, text]
-			&"bookmarks": cached[line] = "%d - %s" % [line + 1, text]
+			&"regions":	  text = "%d. %s" % [index + 1, text.trim_prefix('#' + code_edit.get_code_region_start_tag())]
+			&"bookmarks": text = "%d - %s" % [line + 1, text]
 		
-	if modified:
-		list.clear()
-		var keys := cached.keys()
-		for index in keys.size():
-			var line: int = keys[index]
-			var text: String = cached[line]
-			
-			list.add_item(text)
-			list.set_item_tooltip(index, text)
-			list.set_item_metadata(index, line)
+		entries.append({ "line": line, "text": text })
+	
+	
+	if list.item_count == entries.size() \
+	and not range(entries.size()).any(
+		func(i): return list.get_item_metadata(i) != entries[i].line \
+					 or list.get_item_text(i) != entries[i].text ):
+		return # Exit early if no changes were made
+				
+	# Repopulate the ItemList
+	list.clear()
+	for index in entries.size():
+		var entry: Dictionary = entries[index]
+		list.add_item(entry.text)
+		list.set_item_tooltip(index, entry.text)
+		list.set_item_metadata(index, entry.line)
 
 	
 
