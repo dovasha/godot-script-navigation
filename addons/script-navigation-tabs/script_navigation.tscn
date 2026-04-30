@@ -30,32 +30,32 @@ tab_container = NodePath("TabContainer")
 regions_list = NodePath("TabContainer/Regions/RegionsList")
 bookmarks_list = NodePath("TabContainer/Bookmarks/BookmarksList")
 
-[node name="UpdateTimer" type="Timer" parent="." unique_id=1597462420]
+[node name="UpdateTimer" type="Timer" parent="." unique_id=2002924721]
 wait_time = 0.5
 autostart = true
 
-[node name="TabContainer" type="TabContainer" parent="." unique_id=206292375]
+[node name="TabContainer" type="TabContainer" parent="." unique_id=1172607616]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxEmpty_kfd2r")
 current_tab = 0
 
-[node name="Regions" type="ScrollContainer" parent="TabContainer" unique_id=439092358]
+[node name="Regions" type="ScrollContainer" parent="TabContainer" unique_id=1025252909]
 layout_mode = 2
 metadata/_tab_index = 0
 
-[node name="RegionsList" type="ItemList" parent="TabContainer/Regions" unique_id=1820143533]
+[node name="RegionsList" type="ItemList" parent="TabContainer/Regions" unique_id=1443261365]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_kfd2r")
 
-[node name="Bookmarks" type="ScrollContainer" parent="TabContainer" unique_id=1487969507]
+[node name="Bookmarks" type="ScrollContainer" parent="TabContainer" unique_id=26460345]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 1
 
-[node name="BookmarksList" type="ItemList" parent="TabContainer/Bookmarks" unique_id=1609465391]
+[node name="BookmarksList" type="ItemList" parent="TabContainer/Bookmarks" unique_id=693892341]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3

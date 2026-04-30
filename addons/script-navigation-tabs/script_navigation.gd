@@ -58,7 +58,7 @@ func _refresh_list(items: Array, type: StringName) -> void:
 	for index in items.size():
 		var line: int = items[index]
 		var text: String = code_edit.get_line(line)
-		
+	
 		match type:
 			&"regions":	  text = "%d. %s" % [index + 1, text.trim_prefix('#' + code_edit.get_code_region_start_tag())]
 			&"bookmarks": text = "%d - %s" % [line + 1, text]
