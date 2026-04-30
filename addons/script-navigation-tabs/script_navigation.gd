@@ -68,8 +68,8 @@ func _refresh_list(items: Array, type: StringName) -> void:
 	
 	if list.item_count == entries.size() \
 	and not range(entries.size()).any(
-		func(i): return list.get_item_metadata(i) != entries[i].line \
-					 or list.get_item_text(i) != entries[i].text ):
+		func(ix): return list.get_item_metadata(ix) != entries[ix].line \
+					 or list.get_item_text(ix) != entries[ix].text ):
 		return # Exit early if no changes were made
 				
 	# Repopulate the ItemList
@@ -80,7 +80,6 @@ func _refresh_list(items: Array, type: StringName) -> void:
 		list.set_item_tooltip(index, entry.text)
 		list.set_item_metadata(index, entry.line)
 
-	
 
 func _refresh_bookmarks() -> void:
 	if not is_instance_valid(code_edit):
@@ -88,7 +87,8 @@ func _refresh_bookmarks() -> void:
 	
 	var bookmark_lines := code_edit.get_bookmarked_lines()
 	_refresh_list( bookmark_lines, &"bookmarks" )
-	
+	_set_current_selection(bookmarks_list)
+
 
 func _refresh_regions() -> void:
 	if not is_instance_valid(code_edit):
@@ -100,6 +100,14 @@ func _refresh_regions() -> void:
 			region_lines.append(line)
 	
 	_refresh_list( region_lines, &"regions" )
+	_set_current_selection(regions_list)
+
+
+func _set_current_selection(list: ItemList):
+	for ix in list.item_count:
+		if list.get_item_metadata(ix) == code_edit.get_caret_line():
+			list.select(ix); return # Select item if caret is on its line
+	list.deselect_all()
 #endregion
 
 

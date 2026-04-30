@@ -49,6 +49,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_kfd2r")
+allow_reselect = true
 
 [node name="Bookmarks" type="ScrollContainer" parent="TabContainer" unique_id=26460345]
 visible = false
@@ -60,6 +61,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_kfd2r")
+allow_reselect = true
 
 [connection signal="timeout" from="UpdateTimer" to="." method="_refresh_regions"]
 [connection signal="timeout" from="UpdateTimer" to="." method="_refresh_bookmarks"]
