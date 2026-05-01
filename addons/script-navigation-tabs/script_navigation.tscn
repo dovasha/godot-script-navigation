@@ -1,21 +1,10 @@
 [gd_scene format=3 uid="uid://gdsx27dsoxtc"]
 
 [ext_resource type="Script" uid="uid://d18xsp6ljmvch" path="res://addons/script-navigation-tabs/script_navigation.gd" id="1_05hjw"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_kfd2r"]
-content_margin_top = 2.0
-content_margin_bottom = 2.0
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kfd2r"]
-content_margin_left = 5.0
-content_margin_top = 5.0
-content_margin_right = 5.0
-content_margin_bottom = 5.0
-bg_color = Color(0, 0, 0, 0.23529412)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
+[ext_resource type="Theme" uid="uid://gjrci6cwg30s" path="res://addons/script-navigation-tabs/theme.tres" id="1_dilo7"]
+[ext_resource type="Script" uid="uid://c650i6qvl8khx" path="res://addons/script-navigation-tabs/bookmarks_list.gd" id="2_6e2t8"]
+[ext_resource type="Texture2D" uid="uid://bqm0r7rokta1k" path="res://addons/script-navigation-tabs/icons/regions.svg" id="3_ihmln"]
+[ext_resource type="Texture2D" uid="uid://dalowcy00hbja" path="res://addons/script-navigation-tabs/icons/bookmark.svg" id="4_725nk"]
 
 [node name="ScriptNavigation" type="VSplitContainer" unique_id=799486397 node_paths=PackedStringArray("tab_container", "regions_tree", "bookmarks_list")]
 custom_minimum_size = Vector2(0, 50)
@@ -25,6 +14,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_vertical = 3
+theme = ExtResource("1_dilo7")
 script = ExtResource("1_05hjw")
 tab_container = NodePath("TabContainer")
 regions_tree = NodePath("TabContainer/Regions/RegionsTree")
@@ -37,10 +27,13 @@ autostart = true
 [node name="TabContainer" type="TabContainer" parent="." unique_id=1172607616]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_styles/panel = SubResource("StyleBoxEmpty_kfd2r")
-current_tab = 0
+current_tab = 1
+deselect_enabled = true
+tab_0/icon = ExtResource("3_ihmln")
+tab_1/icon = ExtResource("4_725nk")
 
 [node name="Regions" type="ScrollContainer" parent="TabContainer" unique_id=1025252909]
+visible = false
 layout_mode = 2
 metadata/_tab_index = 0
 
@@ -48,24 +41,25 @@ metadata/_tab_index = 0
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_styles/panel = SubResource("StyleBoxFlat_kfd2r")
 allow_reselect = true
 hide_folding = true
 hide_root = true
 
 [node name="Bookmarks" type="ScrollContainer" parent="TabContainer" unique_id=26460345]
-visible = false
+clip_children = 2
 layout_mode = 2
+horizontal_scroll_mode = 3
 metadata/_tab_index = 1
 
-[node name="BookmarksList" type="ItemList" parent="TabContainer/Bookmarks" unique_id=693892341]
+[node name="BookmarksList" type="VBoxContainer" parent="TabContainer/Bookmarks" unique_id=1913067755]
+clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_styles/panel = SubResource("StyleBoxFlat_kfd2r")
-allow_reselect = true
+theme_override_constants/separation = 3
+script = ExtResource("2_6e2t8")
 
 [connection signal="timeout" from="UpdateTimer" to="." method="_refresh_bookmarks"]
 [connection signal="timeout" from="UpdateTimer" to="." method="_refresh_regions"]
 [connection signal="item_selected" from="TabContainer/Regions/RegionsTree" to="." method="_on_region_selected"]
-[connection signal="item_selected" from="TabContainer/Bookmarks/BookmarksList" to="." method="_on_bookmark_selected"]
+[connection signal="item_clicked" from="TabContainer/Bookmarks/BookmarksList" to="." method="_on_bookmark_selected"]
