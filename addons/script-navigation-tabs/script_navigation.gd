@@ -5,7 +5,7 @@ const REGIONS_ICON = preload("res://addons/script-navigation-tabs/icons/regions.
 const BOOKMARK_ICON = preload("res://addons/script-navigation-tabs/icons/bookmark.svg")
 
 @export var tab_container: TabContainer
-@export var regions_list: ItemList
+@export var regions_tree: Tree
 @export var bookmarks_list: ItemList
 
 # Editor References
@@ -47,67 +47,107 @@ func exit() -> void:
 #endregion
 
 
-#region Items logic
-func _refresh_list(items: Array, type: StringName) -> void:
-	## Refresh the ItemList of the given type, either &"regions" or &"bookmark"
-	
-	# Item Index -> { Line Number: Line Text }
-	var entries: Array[Dictionary] # New entries
-	var list: ItemList = get(&"%s_list" % type)
-	
-	for index in items.size():
-		var line: int = items[index]
-		var text: String = code_edit.get_line(line)
-	
-		match type:
-			&"regions":	  text = "%d. %s" % [index + 1, text.trim_prefix('#' + code_edit.get_code_region_start_tag())]
-			&"bookmarks": text = "%d - %s" % [line + 1, text]
-		
-		entries.append({ "line": line, "text": text })
-	
-	
-	if list.item_count == entries.size() \
-	and not range(entries.size()).any(
-		func(ix): return list.get_item_metadata(ix) != entries[ix].line \
-					 or list.get_item_text(ix) != entries[ix].text ):
-		return # Exit early if no changes were made
-				
-	# Repopulate the ItemList
-	list.clear()
-	for index in entries.size():
-		var entry: Dictionary = entries[index]
-		list.add_item(entry.text)
-		list.set_item_tooltip(index, entry.text)
-		list.set_item_metadata(index, entry.line)
-
-
+#region Items Logic
 func _refresh_bookmarks() -> void:
 	if not is_instance_valid(code_edit):
 		return
+		
+	# Item Index -> { Line Number: Line Text }
+	var entries: Array[Dictionary]
 	
-	var bookmark_lines := code_edit.get_bookmarked_lines()
-	_refresh_list( bookmark_lines, &"bookmarks" )
-	_set_current_selection(bookmarks_list)
+	for line in code_edit.get_bookmarked_lines():
+		var text := "%d - %s" % [line + 1, code_edit.get_line(line)]
+		entries.append({ "line": line, "text": text })
+	
+	if bookmarks_list.item_count == entries.size() \
+	and not range(entries.size()).any(
+		func(ix): return bookmarks_list.get_item_metadata(ix) != entries[ix].line \
+					  or bookmarks_list.get_item_text(ix) != entries[ix].text ):
+		return # Exit early if no changes were made
+	
+	# Repopulate the ItemList
+	bookmarks_list.clear()
+	for index in entries.size():
+		var entry: Dictionary = entries[index]
+		bookmarks_list.add_item(entry.text)
+		bookmarks_list.set_item_tooltip(index, entry.text)
+		bookmarks_list.set_item_metadata(index, entry.line)
 
 
 func _refresh_regions() -> void:
 	if not is_instance_valid(code_edit):
 		return
 	
-	var region_lines: Array = []
+	var entries: Array[Region] # New entries
+	# Region entry indices which have no matching end tag
+	var orphans: Array[int] 
+	
 	for line in code_edit.get_line_count():
 		if code_edit.is_line_code_region_start(line):
-			region_lines.append(line)
+			# Strip white space and remove regions tag
+			var text := code_edit.get_line(line)\
+						.strip_edges(true, false)\
+						.trim_prefix('#' + code_edit.get_code_region_start_tag())
+						
+			# New regions are intrinsically orphans
+			orphans.append(entries.size())
+			entries.append(Region.new(line, text))
+			
+		elif code_edit.is_line_code_region_end(line):
+			if orphans.is_empty(): continue
+			
+			var last_orphan := orphans.pop_back()
+			entries[last_orphan].end = line
+			
+			# Nest entries opened after `last_orphan` since they've all closed by now
+			while entries.size() > last_orphan + 1:
+				entries[last_orphan].sub_regions.append(entries.pop_at(last_orphan + 1))
 	
-	_refresh_list( region_lines, &"regions" )
-	_set_current_selection(regions_list)
+	# Collapse all entries into a root region
+	var regions_root := Region.new(INF, '')
+	regions_root.sub_regions = entries
+	
+	var tree_root := regions_tree.get_root()
+	if not tree_root or _is_regions_tree_modified_recursive(tree_root, regions_root):
+		regions_tree.clear()
+		_populate_regions_tree_recursive(null, regions_root)
 
 
-func _set_current_selection(list: ItemList):
-	for ix in list.item_count:
-		if list.get_item_metadata(ix) == code_edit.get_caret_line():
-			list.select(ix); return # Select item if caret is on its line
-	list.deselect_all()
+func _populate_regions_tree_recursive(root: TreeItem, region: Region) -> void:
+	var item := regions_tree.create_item(root)
+	item.set_text(0, region.text)
+	item.set_tooltip_text(0, region.text)
+	item.set_metadata(0, region.start)
+	
+	for sub in region.sub_regions:
+		_populate_regions_tree_recursive(item, sub)
+
+
+func _is_regions_tree_modified_recursive(root: TreeItem, region: Region) -> bool:
+	var child := root.get_first_child()
+	var subs: Array[Region] = region.sub_regions
+	
+	var next_sub := 0 # Next sub-regions child counter
+	while child or next_sub < subs.size():
+		var sub_region: Region = subs[next_sub] if next_sub < subs.size() else null
+		
+		# Both have entries, check concurrency then recurse
+		if child and sub_region:
+			if child.get_text(0) != sub_region.text\
+			or child.get_metadata(0) != sub_region.start:
+				return true
+				
+			if _is_regions_tree_modified_recursive(child, sub_region):
+				return true # Modification found in recurse
+		 # Region has extra entries
+		elif not child: return true
+		 # Tree has extra entries
+		else: return true
+		
+		child = child.get_next() if child else null
+		next_sub += 1
+		
+	return false
 #endregion
 
 
@@ -125,8 +165,18 @@ func _on_bookmark_selected(index: int) -> void:
 	code_edit.center_viewport_to_caret()
 	
 	
-func _on_region_selected(index: int) -> void:
-	var line_number: int = regions_list.get_item_metadata(index)
+func _on_region_selected() -> void:
+	var item := regions_tree.get_selected()
+	var line_number: int = item.get_metadata(0)
 	script_editor.goto_line(line_number)
 	code_edit.center_viewport_to_caret()
 #endregion
+
+
+class Region:
+	var start: int; var end: int
+	var sub_regions: Array[Region]
+	var text: String
+	func _init(r_start: int, r_text: String) -> void: 
+		start = r_start
+		text = r_text

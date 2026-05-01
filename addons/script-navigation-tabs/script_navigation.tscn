@@ -17,7 +17,7 @@ corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 
-[node name="ScriptNavigation" type="VSplitContainer" unique_id=799486397 node_paths=PackedStringArray("tab_container", "regions_list", "bookmarks_list")]
+[node name="ScriptNavigation" type="VSplitContainer" unique_id=799486397 node_paths=PackedStringArray("tab_container", "regions_tree", "bookmarks_list")]
 custom_minimum_size = Vector2(0, 50)
 anchors_preset = 15
 anchor_right = 1.0
@@ -27,7 +27,7 @@ grow_vertical = 2
 size_flags_vertical = 3
 script = ExtResource("1_05hjw")
 tab_container = NodePath("TabContainer")
-regions_list = NodePath("TabContainer/Regions/RegionsList")
+regions_tree = NodePath("TabContainer/Regions/RegionsTree")
 bookmarks_list = NodePath("TabContainer/Bookmarks/BookmarksList")
 
 [node name="UpdateTimer" type="Timer" parent="." unique_id=2002924721]
@@ -44,12 +44,14 @@ current_tab = 0
 layout_mode = 2
 metadata/_tab_index = 0
 
-[node name="RegionsList" type="ItemList" parent="TabContainer/Regions" unique_id=1443261365]
+[node name="RegionsTree" type="Tree" parent="TabContainer/Regions" unique_id=1577583179]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_kfd2r")
 allow_reselect = true
+hide_folding = true
+hide_root = true
 
 [node name="Bookmarks" type="ScrollContainer" parent="TabContainer" unique_id=26460345]
 visible = false
@@ -63,7 +65,7 @@ size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_kfd2r")
 allow_reselect = true
 
-[connection signal="timeout" from="UpdateTimer" to="." method="_refresh_regions"]
 [connection signal="timeout" from="UpdateTimer" to="." method="_refresh_bookmarks"]
-[connection signal="item_selected" from="TabContainer/Regions/RegionsList" to="." method="_on_region_selected"]
+[connection signal="timeout" from="UpdateTimer" to="." method="_refresh_regions"]
+[connection signal="item_selected" from="TabContainer/Regions/RegionsTree" to="." method="_on_region_selected"]
 [connection signal="item_selected" from="TabContainer/Bookmarks/BookmarksList" to="." method="_on_bookmark_selected"]
