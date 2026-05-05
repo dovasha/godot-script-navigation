@@ -45,6 +45,16 @@ func _exit_tree() -> void:
 	
 func _on_theme_changed() -> void:
 	await get_tree().process_frame
+	
+	# Get the TextEdit normal stylebox from the editor theme,
+	# remove its padding and fix its borders
+	var editor_theme := EditorInterface.get_editor_theme()
+	var sb: StyleBoxFlat = editor_theme.get_stylebox(&"normal", &"TextEdit").duplicate()
+	sb.set_corner_radius_all(3)
+	sb.content_margin_top = 2; sb.content_margin_bottom = 2
+	sb.content_margin_left = 4; sb.content_margin_right = 4
+	script_nav_panel.theme.set_stylebox(&"normal", &"TextEdit", sb)
+	
 	# The sidebar uses a custom panel stylebox that differs from the base editor theme 
 	# Reuse it so our panel matches the rest of the side panel visually
 	var panel_style: StyleBox = methods_panel.find_children("", "ItemList", true, false)[0].get_theme_stylebox(&"panel")

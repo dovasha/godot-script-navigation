@@ -23,10 +23,12 @@ func add_bookmark(line: int, text: String) -> void:
 	# Uses runtime font overrides so the font isn't baked into the theme resource 
 	# Which is necessary to avoid it being 6MB+ and slowing projects
 	item.line_label.add_theme_font_override(&"font", code_font)
-	item.text_label.add_theme_font_override(&"font", code_font)	
+	item.text_label.add_theme_font_override(&"font", code_font)
 	
 	item.line = line; item.text = text
 	item.connect(&"clicked", _on_item_clicked)
+	connect(&"theme_changed", item._on_theme_changed)
+	
 	add_child(item)
 
 

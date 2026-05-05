@@ -4,18 +4,21 @@
 
 [sub_resource type="GDScriptSyntaxHighlighter" id="GDScriptSyntaxHighlighter_yda5c"]
 
-[node name="BookmarkItem" type="HBoxContainer" unique_id=1809702033 node_paths=PackedStringArray("line_label", "text_label")]
+[node name="BookmarkItem" type="HBoxContainer" unique_id=1809702033 node_paths=PackedStringArray("line_label_container", "line_label", "text_label")]
 offset_right = 222.0
 offset_bottom = 35.0
 size_flags_horizontal = 0
 script = ExtResource("1_88t77")
-line_label = NodePath("Line")
+line_label_container = NodePath("Center")
+line_label = NodePath("Center/Line")
 text_label = NodePath("Text")
 
-[node name="Line" type="RichTextLabel" parent="." unique_id=717250196]
+[node name="Center" type="CenterContainer" parent="." unique_id=1047474244]
 custom_minimum_size = Vector2(20, 0)
 layout_mode = 2
-bbcode_enabled = true
+
+[node name="Line" type="RichTextLabel" parent="Center" unique_id=717250196]
+layout_mode = 2
 text = "10"
 fit_content = true
 scroll_active = false

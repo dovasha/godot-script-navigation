@@ -21,7 +21,7 @@ var code_edit: CodeEdit
 
 #region Setup
 func _ready() -> void:
-	# Configure Regions and Bookmarks tab icons
+	# Fix for 4.3: Manually Configure Regions and Bookmarks tab icons
 	var tab_bar: TabBar = tab_container.get_tab_bar()
 	tab_bar.set_tab_icon(Tabs.REGIONS, REGIONS_ICON)
 	tab_bar.set_tab_icon_max_width(Tabs.REGIONS, 15)
@@ -31,13 +31,9 @@ func _ready() -> void:
 	tab_bar.set_tab_hidden(Tabs.REGIONS, HIDE_REGIONS_TAB)
 	tab_bar.set_tab_hidden(Tabs.BOOKMARKS, HIDE_BOOKMARKS_TAB)
 	
-	# Select the first visible tab
-	tab_bar.current_tab = -1
-	for tab in tab_bar.get_tab_count():
-		if not tab_bar.is_tab_hidden(tab):
-			tab_bar.current_tab = tab
-			tab_container.deselect_enabled = false
-			break
+	tab_bar.select_next_available()
+	if tab_bar.current_tab != -1:
+		tab_bar.deselect_enabled = false
 	
 	# Lock horizontal scrolling on the bookmarks tab
 	var h_scroll: HScrollBar = tab_container.get_tab_control(Tabs.BOOKMARKS).get_h_scroll_bar()
@@ -160,6 +156,7 @@ func _on_script_changed(_script: Script = null) -> void:
 func _on_bookmark_selected(index: int) -> void:
 	var line_number: int = bookmarks_list.get_bookmark_line(index)
 	script_editor.goto_line(line_number)
+	code_edit.set_caret_line(line_number)
 	code_edit.center_viewport_to_caret()
 	
 	
@@ -167,6 +164,7 @@ func _on_region_selected() -> void:
 	var item := regions_tree.get_selected()
 	var line_number: int = item.get_metadata(0)
 	script_editor.goto_line(line_number)
+	code_edit.set_caret_line(line_number)
 	code_edit.center_viewport_to_caret()
 #endregion
 

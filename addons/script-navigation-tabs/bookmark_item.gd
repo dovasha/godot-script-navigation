@@ -4,6 +4,7 @@ class_name ScriptNavBookmarkItem extends HBoxContainer
 const HOVERED_OFFSET := 3.0
 signal clicked(index: int)
 
+@export var line_label_container: CenterContainer
 @export var line_label: RichTextLabel
 @export var text_label: TextEdit
 
@@ -24,11 +25,14 @@ var text: String:
 func _ready() -> void:
 	set_process(false)
 	_on_theme_changed()
-	get_parent().connect(&"theme_changed", _on_theme_changed)
-		
+	
+	# Use the GDScript syntax highlighter in version 4.4 and above
+	if ClassDB.can_instantiate("GDScriptSyntaxHighlighter"):
+		text_label.syntax_highlighter = ClassDB.instantiate("GDScriptSyntaxHighlighter")
+	
 func _process(_delta: float) -> void:
 	# Fix for when user scroll while hovering. Keeps the item anchored to the layout
-	text_label.global_position = global_position + Vector2(line_label.size.x + HOVERED_OFFSET, 0)
+	text_label.global_position = global_position + Vector2(line_label_container.size.x + HOVERED_OFFSET, 0)
 	
 func _notification(what: int) -> void:
 	match what:
@@ -59,10 +63,18 @@ func _on_gui_input(event: InputEvent) -> void:
 
 
 func _on_theme_changed() -> void:
-	# Get the TextEdit color from the editor theme,
-	# and make it full opacity and darker
-	var editor_theme := EditorInterface.get_editor_theme()
-	var sb := editor_theme.get_stylebox(&"normal", &"TextEdit")
+	# Manually fit width to content, since TextEdit's "scroll_fit_content_width"
+	# was only added in Godot 4.4 and isn't available in 4.3 or below
+	var font := text_label.get_theme_font("font")
+	var font_size := text_label.get_theme_font_size("font_size")
+	var stylebox := text_label.get_theme_stylebox("normal")
+	text_label.custom_minimum_size.x = ceil(
+			font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x 
+			+ stylebox.content_margin_left
+			+ stylebox.content_margin_right )
+			
+	# Set hover color to the normal panel's colour, and make it full opacity and darker
+	var sb := get_theme_stylebox(&"normal", &"TextEdit")
 	if sb is StyleBoxFlat:
 		hover_color = Color((sb as StyleBoxFlat).bg_color, 1.0).darkened(0.25)
 #endregion
